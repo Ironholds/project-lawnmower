@@ -5,3 +5,4 @@ options(scipen = 500,
 library(ggplot2)
 library(urltools)
 library(data.table)
+library(RMySQL)
