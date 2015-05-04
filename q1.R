@@ -21,7 +21,7 @@ q1_answer <- function(){
                         data$timestamp <- format_timestamp(data$timestamp)
                         
                         #Filter to valid timestamps
-                        data <- data[complete.cases(data),]
+                        data <- data[!is.na(data$timestamp),]
                         
                         #Aggregate to the one-day level
                         data$timestamp <- as.Date(data$timestamp)
