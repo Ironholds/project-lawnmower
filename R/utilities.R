@@ -35,3 +35,49 @@ read_sampled_log <- function(file){
   file.remove(output_file)
   return(data)
 }
+
+#Calculate pageviews
+to_pageviews <- function(data){
+  
+  fixed_grep <- function(field, pattern){
+    grepl(x = field, pattern = pattern, fixed = TRUE, useBytes = TRUE)
+  }
+  
+  fast_grep <- function(field, pattern){
+    grepl(x = field, pattern = pattern, useBytes = TRUE, perl = TRUE)
+  }
+  
+  is_app_pageview <- function(x){
+    is_app <- fixed_grep(x$user_agent, "WikipediaApp")
+    is_pv <- fixed_grep(x$url, "sections=0")
+    is_ios_pv <- (fixed_grep(x$url, "sections=all") & fixed_grep(x$url, "iPhone") & is_app)
+    return(x[(is_app & is_pv) | is_ios_pv,])
+  }
+  
+  data <- data[data$mime_type %in% c("text/html; charset=iso-8859-1",
+                                     "text/html; charset=ISO-8859-1",
+                                     "text/html",
+                                     "text/html; charset=utf-8",
+                                     "text/html; charset=UTF-8",
+                                     "application/json; charset=utf-8"),]
+  
+  data <- data[fast_grep(data$status_code, "(200|304)"),]
+  data$url <- urltools::url_decode(data$url)
+  data <- data[fast_grep(data$url, paste0("((commons|meta|incubator|species)\\.((m|mobile|wap|zero)\\.)?wikimedia|",
+                                          "(wik(ibooks|idata|inews|ipedia|iquote|isource|tionary|iversity|ivoyage)))",
+                                          "\\.org")),]
+  data <- data[!fixed_grep(data$url, pattern = "donate.wikimedia.org"),]
+  data <- data[fast_grep(data$url, "(/sr(-(ec|el))?|\\?((cur|old)id|title)=|/w(iki)?/|/zh(-(cn|hans|hant|hk|mo|my|sg|tw))?/)"),]
+  data <- data[!fast_grep(data$url, "(BannerRandom|CentralAutoLogin|MobileEditor|Undefined|UserLogin|ZeroRatedMobileAccess)"),]
+  
+  is_api <- fixed_grep(data$url, "api.php")
+  data <- rbind(data[!is_api,], is_app_pageview(data[is_api,]))
+  return(data)
+}
+
+#Takes log-formatted timestamps and turns them into actual POSIX timestamps
+format_timestamp <- function(x){
+  x <- iconv(x, to = "UTF-8")
+  x[nchar(x) > 19] <- substring(x[nchar(x) > 19],1,19)
+  return(strptime(x, format = "%Y-%m-%dT%H:%M:%S", tz = "UTC"))
+}
