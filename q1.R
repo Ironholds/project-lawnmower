@@ -10,7 +10,7 @@ q1_answer <- function(){
   
   #Split this task over multiple cores (4, to be precise), providing a subset of the filenames
   #to each core
-  results <- mclapply(X = dates, mc.preschedule = FALSE, mc.cores = 4,
+  results <- mclapply(X = dates, mc.preschedule = FALSE, mc.cores = 3,
                       mc.allow.recursive = FALSE, mc.cleanup = FALSE,
                       FUN = function(file){
                         
@@ -26,7 +26,10 @@ q1_answer <- function(){
                         #Aggregate to the one-day level
                         data$timestamp <- as.Date(data$timestamp)
                         data <- as.data.table(data)
-                        results <- data[,j = list(pageviews = .N), by = "timestamp"]
+                        data <- data[,j = list(pageviews = .N), by = "timestamp"]
+                        
+                        #Report and return
+                        cat(".")
                         return(results)
                       })
 }
