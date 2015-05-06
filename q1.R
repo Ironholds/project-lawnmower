@@ -30,7 +30,7 @@ q1_answer <- function(){
                         
                         #Report and return
                         cat(".")
-                        return(results)
+                        return(data)
                       })
 }
 
