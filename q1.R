@@ -32,6 +32,12 @@ q1_answer <- function(){
                         cat(".")
                         return(data)
                       })
+  
+  results <- do.call("rbind", results)
+  results <- results[results$timestamp >= as.Date("2014-03-01"),]
+  results <- results[,j=list(pageviews = sum(pageviews)), by = "timestamp"]
+  results$pageviews <- results$pageviews*1000
+  write.table(results, file = "./data/q1_results.tsv", row.names = FALSE, quote = TRUE, sep = "\t")
 }
 
 q1_baseline <- function(){
