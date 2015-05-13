@@ -6,7 +6,7 @@ library(parallel)
 q1_answer <- function(){
   
   #Grab the full paths to those files within the date range we want.
-  dates <- get_files(earliest = as.Date("2014-03-01"), latest = as.Date("2015-04-30"))
+  dates <- get_files(earliest = as.Date("2014-03-01"), latest = as.Date("2015-05-01"))
   
   #Split this task over multiple cores (4, to be precise), providing a subset of the filenames
   #to each core
@@ -41,11 +41,24 @@ q1_answer <- function(){
 }
 
 q1_baseline <- function(){
+  
+  
   baseline_data <- read.delim("./data/q1_baseline.tsv", as.is = TRUE, header = TRUE, quote = "")
   baseline_data$timestamp <- as.Date(paste(baseline_data$year, baseline_data$month, baseline_data$day, sep = "-"))
-  baseline_data$type = "Unsampled"
+  baseline_data$type <- "Unsampled"
+  baseline_data <- baseline_data[,c("timestamp","type", "pageviews")]
   
   sampled_data <- read.delim("./data/q1_results.tsv", as.is = TRUE, header = TRUE)
   sampled_data$timestamp <- as.Date(sampled_data$timestamp)
   sampled_data <- sampled_data[sampled_data$timestamp %in% baseline_data$timestamp,]
+  sampled_data$type <- "Sampled"
+  sampled_data <- sampled_data[,c("timestamp","type", "pageviews")]
+  data <- rbind(sampled_data, baseline_data)
+  
+  ggsave(filename = "q1_benchmark.png",
+         plot = ggplot(test, aes(timestamp, pageviews, group = type, colour = type, type = type)) + 
+           geom_line() + labs(title = "Benchmark of sampled and unsampled logs for calculating pageview counts\n April 2015",
+                              x = "Date",
+                              y = "Pageviews"))
+  
 }
