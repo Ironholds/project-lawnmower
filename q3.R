@@ -43,4 +43,18 @@ results <- results[results$timestamp >= as.Date("2015-02-01") & results$timestam
 results <- results[,j=list(pageviews = sum(pageviews)), by = "timestamp"]
 results$pageviews <- results$pageviews*1000
 write.table(results, file = "./data/q3_results.tsv", row.names = FALSE, quote = TRUE, sep = "\t")
-}
+
+baseline_data <- read.delim("./data/q3_baseline.tsv", as.is = TRUE, header = TRUE, quote = "")
+baseline_data$timestamp <- as.Date(paste(baseline_data$year, baseline_data$month, baseline_data$day, sep = "-"))
+baseline_data$type <- "Unsampled"
+baseline_data <- baseline_data[,c("timestamp","pageviews", "type")]
+
+to_plot <- rbind(baseline_data,
+                 results[results$timestamp %in% baseline_data$timestamp,])
+
+ggsave(filename = "q1_benchmark.png",
+       plot = ggplot(to_plot, aes(timestamp, pageviews, group = type, colour = type, type = type)) + 
+         geom_line() + labs(title = "Benchmark of sampled and unsampled logs for calculating pageview counts\n April 2015",
+                            x = "Date",
+                            y = "Pageviews"))
+q()

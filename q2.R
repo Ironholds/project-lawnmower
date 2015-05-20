@@ -8,3 +8,5 @@ q2_answer <- function(){
   result
 }
 #2009036796
+q2_answer()
+q()
