@@ -20,7 +20,7 @@ results <- mclapply(X = dates, mc.preschedule = FALSE, mc.cores = 3,
                       data$timestamp <- format_timestamp(data$timestamp)
                       
                       #Filter to valid timestamps
-                      data <- data[!is.na(data$timestamp),]
+                      data <- data[!is.na(data$timestamp),c("timestamp", "ip_address", "x_forwarded")]
                       
                       #Geolocate
                       data$country <- maxmind(normalise_ips(data$ip_address, data$x_forwarded),
@@ -50,9 +50,9 @@ baseline_data$type <- "Unsampled"
 to_plot <- rbind(baseline_data,
                  results[results$timestamp %in% baseline_data$timestamp,])
 
-ggsave(filename = "q1_benchmark.png",
+ggsave(filename = "q3_benchmark.png",
        plot = ggplot(to_plot, aes(timestamp, pageviews, group = type, colour = type, type = type)) + 
-         geom_line() + labs(title = "Benchmark of sampled and unsampled logs for calculating non-US\nHTTP/HTTPS request counts April 2015",
+         geom_line() + labs(title = "Benchmark of sampled and unsampled logs for calculating non-US\nHTTP/HTTPS requests \n April 2015",
                             x = "Date",
-                            y = "Pageviews"))
+                            y = "Requests"))
 q()
