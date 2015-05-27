@@ -23,6 +23,7 @@ results <- mclapply(X = dates, mc.preschedule = FALSE, mc.cores = 3,
                       #Read in the file and restrict it to just pageviews
                       data <- to_pageviews(read_sampled_log(file))
                       cat(".")
+                      
                       #Sanitise the timestamps
                       data$timestamp <- format_timestamp(data$timestamp)
                       
@@ -39,3 +40,9 @@ results <- mclapply(X = dates, mc.preschedule = FALSE, mc.cores = 3,
                       #Report and return
                       return(data)
                     })
+
+results <- do.call("rbind", results)
+results <- results[,j=list(pageviews = sum(pageviews)), by = "timestamp"]
+results <- results[1:360,]
+results$pageviews <- results$pageviews*1000
+write.table(results, file = "./data/q7_reads.tsv", row.names = FALSE, quote = TRUE, sep = "\t")
