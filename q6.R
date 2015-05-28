@@ -20,3 +20,5 @@ results <- data.table(date = timestamp, user = sha512(paste0(data$user_id, data$
                       project = gsub(x = data$project, pattern = "wiki.*", replacement = ""))
 
 save(results, file = "legal_data_please_preserve.RData")
+
+write.table(as.data.frame(table(results$project)), "q6_output.tsv", row.names=F, sep = "\t", quote = T)
