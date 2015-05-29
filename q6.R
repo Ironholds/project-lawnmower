@@ -17,7 +17,7 @@ data$user <- sha512(paste0(data$user_id, data$user_name), salt = salt)
 results <- data.table(date = timestamp, user = sha512(paste0(data$user_id, data$user_name),
                                                       salt = as.character(rand_num(1))),
                       location = maxmind(data$ip_address, geo_country_path)$country_code,
-                      project = gsub(x = data$project, pattern = "wiki.*", replacement = ""))
+                      project = gsub(x = data$project, pattern = "wik.*", replacement = ""))
 
 save(results, file = "legal_data_please_preserve.RData")
 
